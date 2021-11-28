@@ -5,3 +5,5 @@ This allows for the API key to be stored on the server instead of being stored c
 Technologies Utilized: JavaScript, React, reactstrap, C#, ASP.NET Web API
 
 Thanks for taking a look, no live demo at the moment :(
+
+(Screenshot: https://imgur.com/dKzj2u8)
