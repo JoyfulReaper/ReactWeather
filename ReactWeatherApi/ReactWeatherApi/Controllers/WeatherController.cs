@@ -34,7 +34,7 @@ namespace ReactWeatherApi.Controllers
                 { "alerts", alerts ? "yes" : "no" }
             };
 
-            var response = await CallApi(queryParams);
+            var response = await CallApi(queryParams, "forecast.json");
             if(response.IsSuccessStatusCode)
             {
                 var dcjs = new DataContractJsonSerializer(typeof(WeatherForecast));
@@ -61,7 +61,7 @@ namespace ReactWeatherApi.Controllers
                 { "aqi", aqi ? "yes" : "no" }
             };
 
-            var response = await CallApi(queryParams);
+            var response = await CallApi(queryParams, "current.json");
             if(response.IsSuccessStatusCode)
             {
                 var dcjs = new DataContractJsonSerializer(typeof(CurrentWeather));
@@ -77,9 +77,9 @@ namespace ReactWeatherApi.Controllers
 
         }
 
-        private async Task<HttpResponseMessage> CallApi(Dictionary<string, string> qParams)
+        private async Task<HttpResponseMessage> CallApi(Dictionary<string, string> qParams, string path)
         {
-            var requestUri = QueryHelpers.AddQueryString(_config["BaseUrl"], qParams);
+            var requestUri = QueryHelpers.AddQueryString(_config["BaseUrl"] + path, qParams);
 
             var client = _httpClient.CreateClient();
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);

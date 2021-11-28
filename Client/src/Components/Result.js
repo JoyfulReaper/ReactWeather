@@ -7,9 +7,11 @@ return (
         data.error !== undefined ? <h1 className="display-6">{data.error.message}</h1>
         :
         <>
-        <h1 className="display-6">Current Weather</h1>
+        <h1 className="display-6" style={{display: "inline"}}>Current Weather</h1>
+        <img src={data.current.condition.icon} alt="" />
         <p>
             <strong>Location:</strong> {data.location.name}, {data.location.region}, {data.location.country}<br />
+            <strong>Conditions:</strong> {data.current.condition.text}<br />
             <strong>Last Updated:</strong> {data.current.last_updated} <br />
             <strong>Tempature:</strong> {data.current.temp_f} F <br />
             <strong>Feels Like: </strong>{data.current.feelslike_f} F <br />
