@@ -1,0 +1,91 @@
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
+using ReactWeatherApi.Models;
+using System.Runtime.Serialization.Json;
+
+namespace ReactWeatherApi.Controllers
+{
+
+    [Route("api/[controller]")]
+    [ApiController]
+    public class WeatherController : ControllerBase
+    {
+        private readonly IHttpClientFactory _httpClient;
+        private readonly IConfiguration _config;
+
+        public WeatherController(IHttpClientFactory httpClient,
+            IConfiguration config)
+        {
+            _httpClient = httpClient;
+            _config = config;
+        }
+
+        [HttpGet("forecast")]
+        public async Task<IActionResult> Forecast(string location, int days = 1, bool aqi = false, bool alerts = false)
+        {
+            var weatherForecast = new WeatherForecast();
+
+            var queryParams = new Dictionary<string, string>()
+            {
+                { "key", _config["ApiKey"] },
+                { "q", location },
+                { "aqi", aqi ? "yes" : "no" },
+                { "alerts", alerts ? "yes" : "no" }
+            };
+
+            var response = await CallApi(queryParams);
+            if(response.IsSuccessStatusCode)
+            {
+                var dcjs = new DataContractJsonSerializer(typeof(WeatherForecast));
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                weatherForecast = (WeatherForecast)dcjs.ReadObject(responseStream);
+
+                return Ok(weatherForecast);
+            }
+            else
+            {
+                return StatusCode((int) response.StatusCode);
+            }
+        }
+
+        [HttpGet("current")]
+        public async Task<IActionResult> Current(string location, bool aqi = false)
+        {
+            var currentWeather = new CurrentWeather();
+
+            var queryParams = new Dictionary<string, string>()
+            {
+                { "key", _config["ApiKey"] },
+                { "q", location },
+                { "aqi", aqi ? "yes" : "no" }
+            };
+
+            var response = await CallApi(queryParams);
+            if(response.IsSuccessStatusCode)
+            {
+                var dcjs = new DataContractJsonSerializer(typeof(CurrentWeather));
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                currentWeather = (CurrentWeather)dcjs.ReadObject(responseStream);
+
+                return Ok(currentWeather);
+            }
+            else
+            {
+                return StatusCode((int) response.StatusCode);
+            }
+
+        }
+
+        private async Task<HttpResponseMessage> CallApi(Dictionary<string, string> qParams)
+        {
+            var requestUri = QueryHelpers.AddQueryString(_config["BaseUrl"], qParams);
+
+            var client = _httpClient.CreateClient();
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            var response = await client.SendAsync(request);
+
+            return response;
+        }
+    }
+}
