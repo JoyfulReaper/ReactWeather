@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using ReactWeatherApi.Models;
+using System.Net;
 using System.Runtime.Serialization.Json;
 
 namespace ReactWeatherApi.Controllers
@@ -43,6 +44,10 @@ namespace ReactWeatherApi.Controllers
 
                 return Ok(weatherForecast);
             }
+            else if (response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return BadRequest(await SendError(response));
+            }
             else
             {
                 return StatusCode((int) response.StatusCode);
@@ -70,6 +75,10 @@ namespace ReactWeatherApi.Controllers
 
                 return Ok(currentWeather);
             }
+            else if(response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return BadRequest(await SendError(response));
+            }
             else
             {
                 return StatusCode((int) response.StatusCode);
@@ -86,6 +95,16 @@ namespace ReactWeatherApi.Controllers
             var response = await client.SendAsync(request);
 
             return response;
+        }
+
+        private async Task<WeatherError> SendError(HttpResponseMessage response)
+        {
+            var error = new WeatherError();
+            var dcjs = new DataContractJsonSerializer(typeof(WeatherError));
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            error = (WeatherError)dcjs.ReadObject(responseStream);
+
+            return error;
         }
     }
 }

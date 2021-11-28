@@ -33,7 +33,14 @@ const Weather = () => {
             <Container>
                 <Row className="mt-5">
                     <Col xs="6">
-                        <Form>
+                        <Form
+                            onSubmit ={ 
+                                e => {
+                                    e.preventDefault();
+                                    getWeather();
+                                }
+                            }
+                        >
                             <FormGroup>
                                 <Label for="location">
                                     Location:
@@ -46,6 +53,7 @@ const Weather = () => {
                                 />
                             </FormGroup>
                             <Button 
+                                type="submit"
                                 color="primary"
                                 id="btnGo"
                                 onClick={getWeather}
